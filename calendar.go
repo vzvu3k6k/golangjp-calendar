@@ -82,6 +82,7 @@ func extractEvents(content string, baseDate time.Time) ([]event, error) {
 		matches := eventTextRegexp.FindStringSubmatch(text)
 		e.location = matches[4]
 
+		// TODO: エラー処理する
 		start, end, _ := parseStartAndEnd(text, baseDate)
 		e.start = start
 		e.end = end
