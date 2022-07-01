@@ -7,54 +7,41 @@ import (
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/google/go-cmp/cmp"
+	"gotest.tools/v3/assert"
+	is "gotest.tools/v3/assert/cmp"
 )
 
 func TestGetEventItems(t *testing.T) {
 	source := loadTestdata(t, "blog.xml")
 	items, err := getEventPosts(strings.NewReader(source))
-	if err != nil {
-		t.Error(err)
-	}
-
-	if len(items) != 1 {
-		t.Errorf("expected 1 item, but got %d", len(items))
-	}
-	if items[0].Title != "2022年7月のGoイベント一覧" {
-		t.Errorf("expected \"2022年7月のGoイベント一覧\", but got %s", items[0].Title)
-	}
+	assert.NilError(t, err)
+	assert.Assert(t, is.Len(items, 1))
+	assert.Equal(t, items[0].Title, "2022年7月のGoイベント一覧")
 }
 
 func TestExtractBaseDate(t *testing.T) {
 	t.Run("normal", func(t *testing.T) {
 		title := "2022年7月のGoイベント一覧"
-		baseDate, err := extractBaseDate(title)
-		if err != nil {
-			t.Error(err)
-		}
+		got, err := extractBaseDate(title)
+		assert.NilError(t, err)
 		want := newTime(t, 2022, time.July, 1, 0, 0)
-		if !baseDate.Equal(want) {
-			t.Errorf("expected %v, but got %v", want, baseDate)
-		}
+		assert.DeepEqual(t, got, want)
 	})
 	t.Run("invalid", func(t *testing.T) {
 		title := "invalid title"
 		_, err := extractBaseDate(title)
-		if err == nil {
-			t.Errorf("expected error, but got nil")
-		}
+		assert.ErrorContains(t, err, "cannot parse")
 	})
 }
 
 func TestExtractEvents(t *testing.T) {
 	source := loadTestdata(t, "content.html")
-	events, err := extractEvents(source, time.Date(2020, time.July, 1, 0, 0, 0, 0, getJST(t)))
-	if err != nil {
-		t.Error(err)
-	}
-	if len(events) != 2 {
-		t.Errorf("expected 2 events, but got %d", len(events))
-	}
-	for i, expected := range []event{
+	got, err := extractEvents(source, newTime(t, 2022, time.August, 1, 0, 0))
+	assert.NilError(t, err)
+
+	want := []event{
 		{
 			start:    newTime(t, 2022, time.August, 1, 17, 0),
 			end:      newTime(t, 2022, time.August, 1, 20, 0),
@@ -69,11 +56,22 @@ func TestExtractEvents(t *testing.T) {
 			title:    "shikamashi.go#1",
 			url:      "https://gocon.connpass.com/event/2345/",
 		},
-	} {
-		if events[i] != expected {
-			t.Errorf("expected %v, but got %v", expected, events[i])
-		}
 	}
+	assert.Check(t, is.DeepEqual(got, want, cmp.AllowUnexported(event{})))
+}
+
+func TestParsePartialTime(t *testing.T) {
+	base := newTime(t, 2022, time.July, 7, 0, 0)
+	t.Run("normal", func(t *testing.T) {
+		got, err := parsePartialTime("15:04", "9:00", base)
+		assert.NilError(t, err)
+		want := newTime(t, 2022, time.July, 7, 9, 0)
+		assert.DeepEqual(t, got, want)
+	})
+	t.Run("invalid", func(t *testing.T) {
+		_, err := parsePartialTime("15:04", "invalid", base)
+		assert.ErrorContains(t, err, "cannot parse")
+	})
 }
 
 func loadTestdata(t *testing.T, filename string) string {
@@ -98,13 +96,4 @@ func newTime(t *testing.T, year int, month time.Month, day, hour, min int) time.
 		t.Error(err)
 	}
 	return time.Date(year, month, day, hour, min, 0, 0, loc)
-}
-
-func getJST(t *testing.T) *time.Location {
-	t.Helper()
-	loc, err := time.LoadLocation("Asia/Tokyo")
-	if err != nil {
-		t.Error(err)
-	}
-	return loc
 }

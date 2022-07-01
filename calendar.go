@@ -94,7 +94,7 @@ func extractEvents(content string, baseDate time.Time) ([]event, error) {
 
 func parseStartAndEnd(text string, baseDate time.Time) (time.Time, time.Time, error) {
 	matches := eventTextRegexp.FindStringSubmatch(text)
-	date, err := parsePartialTime("1/2", matches[1], baseDate)
+	date, err := parsePartialDate("1/2", matches[1], baseDate)
 	if err != nil {
 		return time.Time{}, time.Time{}, err
 	}
@@ -110,12 +110,20 @@ func parseStartAndEnd(text string, baseDate time.Time) (time.Time, time.Time, er
 	return start, end, nil
 }
 
-func parsePartialTime(layout, value string, base time.Time) (time.Time, error) {
-	t, err := time.ParseInLocation(layout, value, base.Location())
+func parsePartialDate(layout, value string, base time.Time) (time.Time, error) {
+	t, err := time.Parse(layout, value)
 	if err != nil {
 		return time.Time{}, err
 	}
-	return t.Add(time.Duration(base.UnixNano())), nil
+	return time.Date(base.Year(), t.Month(), t.Day(), 0, 0, 0, 0, base.Location()), nil
+}
+
+func parsePartialTime(layout, value string, base time.Time) (time.Time, error) {
+	t, err := time.Parse(layout, value)
+	if err != nil {
+		return time.Time{}, err
+	}
+	return time.Date(base.Year(), base.Month(), base.Day(), t.Hour(), t.Minute(), 0, 0, base.Location()), nil
 }
 
 func extractBaseDate(postTitle string) (time.Time, error) {
