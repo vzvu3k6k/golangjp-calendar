@@ -1,0 +1,23 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <id>tag:blogger.com,1999:blog-6665474373688142566</id>
+  <updated>2022-06-30T21:23:45.767+09:00</updated>
+  <title type="text">
+    golang.jp ブログ
+  </title>
+  <entry>
+    <id>tag:blogger.com,1999:blog-6665474373688142566.post-2963698481044211935</id>
+    <published>2022-06-27T21:52:00.003+09:00</published>
+    <updated>2022-06-30T21:22:51.339+09:00</updated>
+    <category scheme="http://www.blogger.com/atom/ns#" term="Events" />
+    <title type="text">2022年7月のGoイベント一覧</title>
+    <content type="html">event</content>
+  </entry>
+  <entry>
+    <id>tag:blogger.com,1999:blog-6665474373688142566.post-7205724311648120052</id>
+    <published>2021-04-27T20:24:00.007+09:00</published>
+    <updated>2021-04-29T12:00:28.038+09:00</updated>
+    <title type="text">Go Conference 2021 Spring リンク集</title>
+    <content type="html">Go Conference</content>
+  </entry>
+</feed>
