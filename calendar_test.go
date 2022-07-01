@@ -24,6 +24,27 @@ func TestGetEventItems(t *testing.T) {
 	}
 }
 
+func TestExtractBaseDate(t *testing.T) {
+	t.Run("normal", func(t *testing.T) {
+		title := "2022年7月のGoイベント一覧"
+		baseDate, err := extractBaseDate(title)
+		if err != nil {
+			t.Error(err)
+		}
+		want := newTime(t, 2022, time.July, 1, 0, 0)
+		if !baseDate.Equal(want) {
+			t.Errorf("expected %v, but got %v", want, baseDate)
+		}
+	})
+	t.Run("invalid", func(t *testing.T) {
+		title := "invalid title"
+		_, err := extractBaseDate(title)
+		if err == nil {
+			t.Errorf("expected error, but got nil")
+		}
+	})
+}
+
 func TestExtractEvents(t *testing.T) {
 	source := loadTestdata(t, "content.html")
 	events, err := extractEvents(source, time.Date(2020, time.July, 1, 0, 0, 0, 0, getJST(t)))
@@ -35,13 +56,15 @@ func TestExtractEvents(t *testing.T) {
 	}
 	for i, expected := range []event{
 		{
-			start:    newTime(t, 2022, time.August, 1, 17, 30),
+			start:    newTime(t, 2022, time.August, 1, 17, 0),
+			end:      newTime(t, 2022, time.August, 1, 20, 0),
 			location: "オンライン",
 			title:    "Go 2 リリースパーティー",
 			url:      "https://gocon.connpass.com/event/1234/",
 		},
 		{
 			start:    newTime(t, 2022, time.August, 31, 7, 0),
+			end:      newTime(t, 2022, time.August, 31, 7, 30),
 			location: "兵庫県飾磨市",
 			title:    "shikamashi.go#1",
 			url:      "https://gocon.connpass.com/event/2345/",

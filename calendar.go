@@ -123,5 +123,5 @@ func extractBaseDate(postTitle string) (time.Time, error) {
 	if err != nil {
 		return time.Time{}, err
 	}
-	return time.ParseInLocation("2006年1月", postTitle, loc)
+	return time.ParseInLocation("2006年1月のGoイベント一覧", postTitle, loc)
 }
