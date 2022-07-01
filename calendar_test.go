@@ -6,21 +6,8 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+	"time"
 )
-
-func loadTestdata(t *testing.T, filename string) string {
-	f, err := os.Open(filepath.Join("testdata", filename))
-	if err != nil {
-		t.Error(err)
-	}
-	t.Cleanup(func() { f.Close() })
-
-	content, err := io.ReadAll(f)
-	if err != nil {
-		t.Error(err)
-	}
-	return string(content)
-}
 
 func TestGetEventItems(t *testing.T) {
 	source := loadTestdata(t, "blog.xml")
@@ -39,8 +26,62 @@ func TestGetEventItems(t *testing.T) {
 
 func TestExtractEvents(t *testing.T) {
 	source := loadTestdata(t, "content.html")
-	events := extractEvents(source)
+	events, err := extractEvents(source, time.Date(2020, time.July, 1, 0, 0, 0, 0, getJST(t)))
+	if err != nil {
+		t.Error(err)
+	}
 	if len(events) != 2 {
 		t.Errorf("expected 2 events, but got %d", len(events))
 	}
+	for i, expected := range []event{
+		{
+			start:    newTime(t, 2022, time.August, 1, 17, 30),
+			location: "オンライン",
+			title:    "Go 2 リリースパーティー",
+			url:      "https://gocon.connpass.com/event/1234/",
+		},
+		{
+			start:    newTime(t, 2022, time.August, 31, 7, 0),
+			location: "兵庫県飾磨市",
+			title:    "shikamashi.go#1",
+			url:      "https://gocon.connpass.com/event/2345/",
+		},
+	} {
+		if events[i] != expected {
+			t.Errorf("expected %v, but got %v", expected, events[i])
+		}
+	}
+}
+
+func loadTestdata(t *testing.T, filename string) string {
+	t.Helper()
+	f, err := os.Open(filepath.Join("testdata", filename))
+	if err != nil {
+		t.Error(err)
+	}
+	t.Cleanup(func() { f.Close() })
+
+	content, err := io.ReadAll(f)
+	if err != nil {
+		t.Error(err)
+	}
+	return string(content)
+}
+
+func newTime(t *testing.T, year int, month time.Month, day, hour, min int) time.Time {
+	t.Helper()
+	loc, err := time.LoadLocation("Asia/Tokyo")
+	if err != nil {
+		t.Error(err)
+	}
+	return time.Date(year, month, day, hour, min, 0, 0, loc)
+}
+
+func getJST(t *testing.T) *time.Location {
+	t.Helper()
+	loc, err := time.LoadLocation("Asia/Tokyo")
+	if err != nil {
+		t.Error(err)
+	}
+	return loc
 }

@@ -4,36 +4,13 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"regexp"
+	"strings"
+	"time"
 
-	ical "github.com/arran4/golang-ical"
+	"github.com/PuerkitoBio/goquery"
 	"github.com/mmcdole/gofeed"
 )
-
-const eventCategory = "Events"
-
-func getEventPosts(source io.Reader) ([]*gofeed.Item, error) {
-	feed, err := gofeed.NewParser().Parse(source)
-	if err != nil {
-		return nil, err
-	}
-
-	var items []*gofeed.Item
-	for _, item := range feed.Items {
-		if item.Categories != nil {
-			for _, c := range item.Categories {
-				if c == eventCategory {
-					items = append(items, item)
-					break
-				}
-			}
-		}
-	}
-	return items, nil
-}
-
-func extractEvents(content string) []*ical.VEvent {
-	return nil
-}
 
 func Run(args []string) error {
 	feedURL := args[0]
@@ -50,9 +27,101 @@ func Run(args []string) error {
 	}
 
 	for _, post := range posts {
-		events := extractEvents(post.Content)
+		baseDate, err := extractBaseDate(post.Title)
+		if err != nil {
+			return err
+		}
+
+		events, err := extractEvents(post.Content, baseDate)
+		if err != nil {
+			return err
+		}
 		fmt.Println(events)
 	}
 
 	return nil
+}
+
+func getEventPosts(source io.Reader) ([]*gofeed.Item, error) {
+	feed, err := gofeed.NewParser().Parse(source)
+	if err != nil {
+		return nil, err
+	}
+
+	var items []*gofeed.Item
+	for _, item := range feed.Items {
+		if item.Categories != nil {
+			for _, c := range item.Categories {
+				if c == "Events" {
+					items = append(items, item)
+					break
+				}
+			}
+		}
+	}
+	return items, nil
+}
+
+var eventTextRegexp = regexp.MustCompile(`(\d{1,2}/\d{1,2})\([日月火水木金土]\) (\d{1,2}:\d{2})〜(\d{1,2}:\d{2}) \[(.+?)\]`)
+
+func extractEvents(content string, baseDate time.Time) ([]event, error) {
+	doc, err := goquery.NewDocumentFromReader(strings.NewReader(content))
+	if err != nil {
+		return nil, err
+	}
+
+	var events []event
+	doc.Find("li").Each(func(i int, s *goquery.Selection) {
+		var e event
+
+		link := s.Find("a")
+		e.title = link.Text()
+		e.url = link.AttrOr("href", "")
+
+		text := s.Contents().First().Text()
+		matches := eventTextRegexp.FindStringSubmatch(text)
+		e.location = matches[4]
+
+		start, end, _ := parseStartAndEnd(text, baseDate)
+		e.start = start
+		e.end = end
+
+		events = append(events, e)
+	})
+
+	return events, nil
+}
+
+func parseStartAndEnd(text string, baseDate time.Time) (time.Time, time.Time, error) {
+	matches := eventTextRegexp.FindStringSubmatch(text)
+	date, err := parsePartialTime("1/2", matches[1], baseDate)
+	if err != nil {
+		return time.Time{}, time.Time{}, err
+	}
+	start, err := parsePartialTime("15:04", matches[2], date)
+	if err != nil {
+		return time.Time{}, time.Time{}, err
+	}
+	end, err := parsePartialTime("15:04", matches[3], date)
+	if err != nil {
+		return time.Time{}, time.Time{}, err
+	}
+
+	return start, end, nil
+}
+
+func parsePartialTime(layout, value string, base time.Time) (time.Time, error) {
+	t, err := time.ParseInLocation(layout, value, base.Location())
+	if err != nil {
+		return time.Time{}, err
+	}
+	return t.Add(time.Duration(base.UnixNano())), nil
+}
+
+func extractBaseDate(postTitle string) (time.Time, error) {
+	loc, err := time.LoadLocation("Asia/Tokyo")
+	if err != nil {
+		return time.Time{}, err
+	}
+	return time.ParseInLocation("2006年1月", postTitle, loc)
 }
