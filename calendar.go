@@ -1,6 +1,7 @@
 package calendar
 
 import (
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -62,8 +63,6 @@ func getEventPosts(source io.Reader) ([]*gofeed.Item, error) {
 	return items, nil
 }
 
-var eventTextRegexp = regexp.MustCompile(`(\d{1,2}/\d{1,2})\([日月火水木金土]\) (\d{1,2}:\d{2})〜(\d{1,2}:\d{2}) \[(.+?)\]`)
-
 func extractEvents(content string, baseDate time.Time) ([]event, error) {
 	doc, err := goquery.NewDocumentFromReader(strings.NewReader(content))
 	if err != nil {
@@ -71,26 +70,55 @@ func extractEvents(content string, baseDate time.Time) ([]event, error) {
 	}
 
 	var events []event
-	doc.Find("li").Each(func(i int, s *goquery.Selection) {
-		var e event
-
-		link := s.Find("a")
-		e.title = link.Text()
-		e.url = link.AttrOr("href", "")
-
-		text := s.Contents().First().Text()
-		matches := eventTextRegexp.FindStringSubmatch(text)
-		e.location = matches[4]
-
-		// TODO: エラー処理する
-		start, end, _ := parseStartAndEnd(text, baseDate)
-		e.start = start
-		e.end = end
-
+	doc.Find("li").EachWithBreak(func(i int, s *goquery.Selection) bool {
+		e, err := parseEvent(s, baseDate)
+		if err != nil {
+			return false
+		}
 		events = append(events, e)
+		return true
 	})
+	if err != nil {
+		return nil, err
+	}
 
 	return events, nil
+}
+
+var eventTextRegexp = regexp.MustCompile(`(\d{1,2}/\d{1,2})\([日月火水木金土]\) (\d{1,2}:\d{2})〜(\d{1,2}:\d{2}) \[(.+?)\]`)
+
+func parseEvent(s *goquery.Selection, baseDate time.Time) (event, error) {
+	var e event
+
+	link := s.Find("a")
+	title, url, err := parseTitleAndURL(link)
+	if err != nil {
+		return event{}, err
+	}
+	e.title = title
+	e.url = url
+
+	text := s.Contents().First().Text()
+	matches := eventTextRegexp.FindStringSubmatch(text)
+	e.location = matches[4]
+
+	start, end, err := parseStartAndEnd(text, baseDate)
+	if err != nil {
+		return event{}, err
+	}
+	e.start = start
+	e.end = end
+
+	return e, nil
+}
+
+func parseTitleAndURL(link *goquery.Selection) (string, string, error) {
+	title := link.Text()
+	url, exists := link.Attr("href")
+	if !exists {
+		return "", "", errors.New("no href")
+	}
+	return title, url, nil
 }
 
 func parseStartAndEnd(text string, baseDate time.Time) (time.Time, time.Time, error) {
