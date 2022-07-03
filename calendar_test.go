@@ -18,16 +18,17 @@ import (
 )
 
 func TestRun(t *testing.T) {
-	h := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		fmt.Fprintln(w, loadTestdata(t, "blog_full.xml"))
-	})
-	ts := httptest.NewServer(h)
+	ts := httptest.NewServer(
+		http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			fmt.Fprintln(w, loadTestdata(t, "blog_full.xml"))
+		}),
+	)
 	defer ts.Close()
 
 	var out bytes.Buffer
 	err := Run(&out, []string{ts.URL})
 	assert.NilError(t, err)
-	t.Log(out.String())
+	assert.Equal(t, out.String(), loadTestdata(t, "blog_full.ical"))
 }
 
 func TestGetEventItems(t *testing.T) {
