@@ -1,7 +1,6 @@
 package calendar
 
 import (
-	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -9,9 +8,10 @@ import (
 	"strings"
 	"time"
 
-	"github.com/PuerkitoBio/goquery"
+	"github.com/antchfx/htmlquery"
 	ics "github.com/arran4/golang-ical"
 	"github.com/mmcdole/gofeed"
+	"golang.org/x/net/html"
 )
 
 func Run(args []string) error {
@@ -86,22 +86,23 @@ func getEventPosts(source io.Reader) ([]*gofeed.Item, error) {
 }
 
 func extractEvents(content string, baseDate time.Time) ([]event, error) {
-	doc, err := goquery.NewDocumentFromReader(strings.NewReader(content))
+	doc, err := htmlquery.Parse(strings.NewReader(content))
+	if err != nil {
+		return nil, err
+	}
+
+	nodes, err := htmlquery.QueryAll(doc, "//li")
 	if err != nil {
 		return nil, err
 	}
 
 	var events []event
-	doc.Find("li").EachWithBreak(func(i int, s *goquery.Selection) bool {
-		e, err := parseEvent(s, baseDate)
+	for _, node := range nodes {
+		e, err := parseEvent(node, baseDate)
 		if err != nil {
-			return false
+			return nil, err
 		}
 		events = append(events, e)
-		return true
-	})
-	if err != nil {
-		return nil, err
 	}
 
 	return events, nil
@@ -109,10 +110,10 @@ func extractEvents(content string, baseDate time.Time) ([]event, error) {
 
 var eventTextRegexp = regexp.MustCompile(`(\d{1,2}/\d{1,2})\([日月火水木金土]\)\p{Zs}*(\d{1,2}:\d{2})〜(\d{1,2}:\d{2})\p{Zs}*\[(.+?)\]`)
 
-func parseEvent(s *goquery.Selection, baseDate time.Time) (event, error) {
+func parseEvent(node *html.Node, baseDate time.Time) (event, error) {
 	var e event
 
-	link := s.Find("a")
+	link := htmlquery.FindOne(node, "./a")
 	title, url, err := parseTitleAndURL(link)
 	if err != nil {
 		return event{}, err
@@ -120,7 +121,7 @@ func parseEvent(s *goquery.Selection, baseDate time.Time) (event, error) {
 	e.title = title
 	e.url = url
 
-	text := s.Contents().First().Text()
+	text := htmlquery.InnerText(node)
 	matches := eventTextRegexp.FindStringSubmatch(text)
 	e.location = matches[4]
 
@@ -134,12 +135,9 @@ func parseEvent(s *goquery.Selection, baseDate time.Time) (event, error) {
 	return e, nil
 }
 
-func parseTitleAndURL(link *goquery.Selection) (string, string, error) {
-	title := link.Text()
-	url, exists := link.Attr("href")
-	if !exists {
-		return "", "", errors.New("no href")
-	}
+func parseTitleAndURL(link *html.Node) (string, string, error) {
+	title := htmlquery.InnerText(link)
+	url := htmlquery.SelectAttr(link, "href")
 	return title, url, nil
 }
 
