@@ -14,7 +14,7 @@ import (
 	"golang.org/x/net/html"
 )
 
-func Run(args []string) error {
+func Run(out io.Writer, args []string) error {
 	feedURL := args[0]
 
 	resp, err := http.Get(feedURL)
@@ -43,7 +43,7 @@ func Run(args []string) error {
 	}
 
 	calendar := buildCalendar(events)
-	fmt.Println(calendar)
+	fmt.Fprintln(out, calendar)
 
 	return nil
 }

@@ -1,7 +1,11 @@
 package calendar
 
 import (
+	"bytes"
+	"fmt"
 	"io"
+	"net/http"
+	"net/http/httptest"
 	"os"
 	"path/filepath"
 	"strings"
@@ -12,6 +16,19 @@ import (
 	"gotest.tools/v3/assert"
 	is "gotest.tools/v3/assert/cmp"
 )
+
+func TestRun(t *testing.T) {
+	h := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		fmt.Fprintln(w, loadTestdata(t, "blog_full.xml"))
+	})
+	ts := httptest.NewServer(h)
+	defer ts.Close()
+
+	var out bytes.Buffer
+	err := Run(&out, []string{ts.URL})
+	assert.NilError(t, err)
+	t.Log(out.String())
+}
 
 func TestGetEventItems(t *testing.T) {
 	source := loadTestdata(t, "blog.xml")

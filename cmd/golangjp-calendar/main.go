@@ -7,5 +7,5 @@ import (
 )
 
 func main() {
-	calendar.Run(os.Args[1:])
+	calendar.Run(os.Stdout, os.Args[1:])
 }
