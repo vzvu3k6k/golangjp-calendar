@@ -62,6 +62,8 @@ func buildCalendar(events []event) string {
 	return cal.Serialize()
 }
 
+var titlePattern = regexp.MustCompile(`^\d{4}年\d{1,2}月のGoイベント一覧$`)
+
 func getEventPosts(source io.Reader) ([]*gofeed.Item, error) {
 	feed, err := gofeed.NewParser().Parse(source)
 	if err != nil {
@@ -70,13 +72,8 @@ func getEventPosts(source io.Reader) ([]*gofeed.Item, error) {
 
 	var items []*gofeed.Item
 	for _, item := range feed.Items {
-		if item.Categories != nil {
-			for _, c := range item.Categories {
-				if c == "Events" {
-					items = append(items, item)
-					break
-				}
-			}
+		if titlePattern.MatchString(item.Title) {
+			items = append(items, item)
 		}
 	}
 	return items, nil
