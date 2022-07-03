@@ -1,0 +1,133 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//arran4//Golang ICS Library
+METHOD:REQUEST
+BEGIN:VEVENT
+UID:id@domain-1656669600
+DTSTART:20220701T100000Z
+DTEND:20220701T113000Z
+SUMMARY:これだけは伝えたい！Goのすごさとその将来性
+LOCATION:オンライン
+URL:https://increments.connpass.com/event/250648/
+END:VEVENT
+BEGIN:VEVENT
+UID:id@domain-1656734400
+DTSTART:20220702T040000Z
+DTEND:20220702T080000Z
+SUMMARY:第25回『プログラミング言語Go』オンライン読書会
+ （第2サイクル：12回目）
+LOCATION:オンライン
+URL:https://gpl-reading.connpass.com/event/250396/
+END:VEVENT
+BEGIN:VEVENT
+UID:id@domain-1657062300
+DTSTART:20220705T230500Z
+DTEND:20220705T235500Z
+SUMMARY:【初心者歓迎】GoでTDDをやってみよう! #22
+LOCATION:オンライン
+URL:https://yasashii-agile.connpass.com/event/252956/
+END:VEVENT
+BEGIN:VEVENT
+UID:id@domain-1657080600
+DTSTART:20220706T041000Z
+DTEND:20220706T050000Z
+SUMMARY:Let's Go Talk #1 (GoのLT会)
+LOCATION:オンライン
+URL:https://connehito.connpass.com/event/251002/
+END:VEVENT
+BEGIN:VEVENT
+UID:id@domain-1657265400
+DTSTART:20220708T073000Z
+DTEND:20220708T083000Z
+SUMMARY:tenntenn.go #7 - ゆるい勉強会 -
+LOCATION:オンライン
+URL:https://tenntenn.connpass.com/event/252477/
+END:VEVENT
+BEGIN:VEVENT
+UID:id@domain-1657324800
+DTSTART:20220709T000000Z
+DTEND:20220709T020000Z
+SUMMARY:Gopher道場 自習室 OpenDay #3
+LOCATION:オンライン
+URL:https://gopherdojo.connpass.com/event/251574/
+END:VEVENT
+BEGIN:VEVENT
+UID:id@domain-1657328400
+DTSTART:20220709T010000Z
+DTEND:20220709T030000Z
+SUMMARY:Women Who Go Tokyo -
+  Goならわかるシステムプログラミング#18
+LOCATION:オンライン
+URL:https://womenwhogo-tokyo.connpass.com/event/252503/
+END:VEVENT
+BEGIN:VEVENT
+UID:id@domain-1657339200
+DTSTART:20220709T040000Z
+DTEND:20220709T081500Z
+SUMMARY:【学生・第二新卒向け／オンライン実施】Step up Go
+  4-3
+LOCATION:オンライン
+URL:https://mercari.connpass.com/event/250751/
+END:VEVENT
+BEGIN:VEVENT
+UID:id@domain-1657616400
+DTSTART:20220712T090000Z
+DTEND:20220712T103000Z
+SUMMARY:Golang で 2D ゲームに TRY してみよう！（続）【belong
+  try #6】
+LOCATION:オンライン
+URL:https://belong.connpass.com/event/252311/
+END:VEVENT
+BEGIN:VEVENT
+UID:id@domain-1657706400
+DTSTART:20220713T100000Z
+DTEND:20220713T110000Z
+SUMMARY:第9回Goの標準ライブラリのコードを見てみよう(オ
+ フライン)
+LOCATION:宮城県仙台市
+URL:https://sendaigo.connpass.com/event/250830/
+END:VEVENT
+BEGIN:VEVENT
+UID:id@domain-1658271600
+DTSTART:20220719T230000Z
+DTEND:20220720T010000Z
+SUMMARY:【オフライン朝活@立川】第1回 ITなんでも勉強会
+  @hitoride立川
+LOCATION:東京都立川市
+URL:https://hitroride.connpass.com/event/252736/
+END:VEVENT
+BEGIN:VEVENT
+UID:id@domain-1658358000
+DTSTART:20220720T230000Z
+DTEND:20220721T010000Z
+SUMMARY:【オフライン朝活@川崎】第1回 ITなんでも勉強会
+  @hitoride川崎
+LOCATION:神奈川県川崎市
+URL:https://hitroride.connpass.com/event/252742/
+END:VEVENT
+BEGIN:VEVENT
+UID:id@domain-1658548800
+DTSTART:20220723T040000Z
+DTEND:20220723T080000Z
+SUMMARY:第42回横浜Go読書会（オンライン）
+LOCATION:オンライン
+URL:https://yokohama-go-reading.connpass.com/event/252524/
+END:VEVENT
+BEGIN:VEVENT
+UID:id@domain-1658915700
+DTSTART:20220727T095500Z
+DTEND:20220727T120000Z
+SUMMARY:Fukuoka.go#18 Reboot (完全オフライン開催)
+LOCATION:福岡県福岡市
+URL:https://fukuokago.connpass.com/event/251544/
+END:VEVENT
+BEGIN:VEVENT
+UID:id@domain-1659139200
+DTSTART:20220730T000000Z
+DTEND:20220730T013000Z
+SUMMARY:Kyoto.go remote #33 Go 1.19モブ・リーディング会
+LOCATION:オンライン
+URL:https://kyotogo.connpass.com/event/251338/
+END:VEVENT
+END:VCALENDAR
+
