@@ -91,7 +91,7 @@ func extractEvents(content string, baseDate time.Time) ([]event, error) {
 		return nil, err
 	}
 
-	nodes, err := htmlquery.QueryAll(doc, "//li")
+	nodes, err := htmlquery.QueryAll(doc, "//div/ul/li")
 	if err != nil {
 		return nil, err
 	}
