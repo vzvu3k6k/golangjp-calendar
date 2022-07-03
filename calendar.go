@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/PuerkitoBio/goquery"
+	ics "github.com/arran4/golang-ical"
 	"github.com/mmcdole/gofeed"
 )
 
@@ -27,20 +28,41 @@ func Run(args []string) error {
 		return err
 	}
 
-	for _, post := range posts {
+	var events []event
+	for _, post := range posts[:1] {
 		baseDate, err := extractBaseDate(post.Title)
 		if err != nil {
 			return err
 		}
 
-		events, err := extractEvents(post.Content, baseDate)
+		_events, err := extractEvents(post.Content, baseDate)
 		if err != nil {
 			return err
 		}
-		fmt.Println(events)
+		events = append(events, _events...)
 	}
 
+	calendar := buildCalendar(events)
+	fmt.Println(calendar)
+
 	return nil
+}
+
+func buildCalendar(events []event) string {
+	cal := ics.NewCalendar()
+	cal.SetMethod(ics.MethodRequest)
+	for _, event := range events {
+		e := cal.AddEvent(fmt.Sprintf("id@domain-%d", time.Now().Unix()))
+		e.SetCreatedTime(time.Now())
+		e.SetDtStampTime(time.Now())
+		e.SetModifiedAt(time.Now())
+		e.SetStartAt(event.start)
+		e.SetEndAt(event.end)
+		e.SetSummary(event.title)
+		e.SetLocation(event.location)
+		e.SetURL(event.url)
+	}
+	return cal.Serialize()
 }
 
 func getEventPosts(source io.Reader) ([]*gofeed.Item, error) {
@@ -85,7 +107,7 @@ func extractEvents(content string, baseDate time.Time) ([]event, error) {
 	return events, nil
 }
 
-var eventTextRegexp = regexp.MustCompile(`(\d{1,2}/\d{1,2})\([日月火水木金土]\) (\d{1,2}:\d{2})〜(\d{1,2}:\d{2}) \[(.+?)\]`)
+var eventTextRegexp = regexp.MustCompile(`(\d{1,2}/\d{1,2})\([日月火水木金土]\)\p{Zs}*(\d{1,2}:\d{2})〜(\d{1,2}:\d{2})\p{Zs}*\[(.+?)\]`)
 
 func parseEvent(s *goquery.Selection, baseDate time.Time) (event, error) {
 	var e event
