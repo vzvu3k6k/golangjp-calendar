@@ -52,10 +52,7 @@ func buildCalendar(events []event) string {
 	cal := ics.NewCalendar()
 	cal.SetMethod(ics.MethodRequest)
 	for _, event := range events {
-		e := cal.AddEvent(fmt.Sprintf("id@domain-%d", time.Now().Unix()))
-		e.SetCreatedTime(time.Now())
-		e.SetDtStampTime(time.Now())
-		e.SetModifiedAt(time.Now())
+		e := cal.AddEvent(fmt.Sprintf("id@domain-%d", event.start.Unix())) // TODO: まともなIDを生成する
 		e.SetStartAt(event.start)
 		e.SetEndAt(event.end)
 		e.SetSummary(event.title)
