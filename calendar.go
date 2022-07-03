@@ -30,22 +30,26 @@ func Run(out io.Writer, args []string) error {
 
 	var events []event
 	for _, post := range posts[:1] {
-		baseDate, err := extractBaseDate(post.Title)
+		e, err := extractEvents(post)
 		if err != nil {
 			return err
 		}
-
-		_events, err := extractEvents(post.Content, baseDate)
-		if err != nil {
-			return err
-		}
-		events = append(events, _events...)
+		events = append(events, e...)
 	}
 
 	calendar := buildCalendar(events)
 	fmt.Fprintln(out, calendar)
 
 	return nil
+}
+
+func extractEvents(post *gofeed.Item) ([]event, error) {
+	baseDate, err := extractBaseDate(post.Title)
+	if err != nil {
+		return nil, err
+	}
+
+	return _extractEvents(post.Content, baseDate)
 }
 
 func buildCalendar(events []event) string {
@@ -79,7 +83,7 @@ func extractEventPosts(source io.Reader) ([]*gofeed.Item, error) {
 	return items, nil
 }
 
-func extractEvents(content string, baseDate time.Time) ([]event, error) {
+func _extractEvents(content string, baseDate time.Time) ([]event, error) {
 	doc, err := htmlquery.Parse(strings.NewReader(content))
 	if err != nil {
 		return nil, err

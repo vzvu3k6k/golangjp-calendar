@@ -57,7 +57,7 @@ func TestExtractBaseDate(t *testing.T) {
 
 func TestExtractEvents(t *testing.T) {
 	source := loadTestdata(t, "content.html")
-	got, err := extractEvents(source, newTime(t, 2022, time.August, 1, 0, 0))
+	got, err := _extractEvents(source, newTime(t, 2022, time.August, 1, 0, 0))
 	assert.NilError(t, err)
 
 	want := []event{
