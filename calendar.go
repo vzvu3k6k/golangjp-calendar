@@ -17,13 +17,13 @@ import (
 func Run(out io.Writer, args []string) error {
 	feedURL := args[0]
 
-	resp, err := http.Get(feedURL)
+	feed, err := http.Get(feedURL)
 	if err != nil {
 		return err
 	}
-	defer resp.Body.Close()
+	defer feed.Body.Close()
 
-	posts, err := getEventPosts(resp.Body)
+	posts, err := extractEventPosts(feed.Body)
 	if err != nil {
 		return err
 	}
@@ -64,7 +64,7 @@ func buildCalendar(events []event) string {
 
 var titlePattern = regexp.MustCompile(`^\d{4}年\d{1,2}月のGoイベント一覧$`)
 
-func getEventPosts(source io.Reader) ([]*gofeed.Item, error) {
+func extractEventPosts(source io.Reader) ([]*gofeed.Item, error) {
 	feed, err := gofeed.NewParser().Parse(source)
 	if err != nil {
 		return nil, err

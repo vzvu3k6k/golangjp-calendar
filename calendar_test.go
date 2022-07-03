@@ -34,7 +34,7 @@ func TestRun(t *testing.T) {
 
 func TestGetEventItems(t *testing.T) {
 	source := loadTestdata(t, "blog.xml")
-	items, err := getEventPosts(strings.NewReader(source))
+	items, err := extractEventPosts(strings.NewReader(source))
 	assert.NilError(t, err)
 	assert.Assert(t, is.Len(items, 1))
 	assert.Equal(t, items[0].Title, "2022年7月のGoイベント一覧")
