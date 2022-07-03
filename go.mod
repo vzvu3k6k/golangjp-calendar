@@ -3,7 +3,6 @@ module github.com/vzvu3k6k/golangjp-calendar
 go 1.18
 
 require (
-	github.com/PuerkitoBio/goquery v1.5.1
 	github.com/antchfx/htmlquery v1.2.5
 	github.com/arran4/golang-ical v0.0.0-20220517104411-fd89fefb0182
 	github.com/google/go-cmp v0.5.5
@@ -13,6 +12,7 @@ require (
 )
 
 require (
+	github.com/PuerkitoBio/goquery v1.5.1 // indirect
 	github.com/andybalholm/cascadia v1.1.0 // indirect
 	github.com/antchfx/xpath v1.2.1 // indirect
 	github.com/golang/groupcache v0.0.0-20200121045136-8c9f03a8e57e // indirect
