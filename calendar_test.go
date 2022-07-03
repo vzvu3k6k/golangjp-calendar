@@ -34,7 +34,7 @@ func TestRun(t *testing.T) {
 
 func TestGetEventItems(t *testing.T) {
 	source := loadTestdata(t, "blog.xml")
-	items, err := extractEventPosts(strings.NewReader(source))
+	items, err := getEventPosts(strings.NewReader(source))
 	assert.NilError(t, err)
 	assert.Assert(t, is.Len(items, 1))
 	assert.Equal(t, items[0].Title, "2022年7月のGoイベント一覧")
@@ -43,14 +43,14 @@ func TestGetEventItems(t *testing.T) {
 func TestExtractBaseDate(t *testing.T) {
 	t.Run("normal", func(t *testing.T) {
 		title := "2022年7月のGoイベント一覧"
-		got, err := extractBaseDate(title)
+		got, err := getBaseDate(title)
 		assert.NilError(t, err)
 		want := newTime(t, 2022, time.July, 1, 0, 0)
 		assert.DeepEqual(t, got, want)
 	})
 	t.Run("invalid", func(t *testing.T) {
 		title := "invalid title"
-		_, err := extractBaseDate(title)
+		_, err := getBaseDate(title)
 		assert.ErrorContains(t, err, "cannot parse")
 	})
 }

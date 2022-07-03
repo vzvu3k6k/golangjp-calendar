@@ -23,14 +23,14 @@ func Run(out io.Writer, args []string) error {
 	}
 	defer feed.Body.Close()
 
-	posts, err := extractEventPosts(feed.Body)
+	posts, err := getEventPosts(feed.Body)
 	if err != nil {
 		return err
 	}
 
 	var events []event
 	for _, post := range posts[:1] {
-		e, err := extractEvents(post)
+		e, err := getEvents(post)
 		if err != nil {
 			return err
 		}
@@ -43,8 +43,8 @@ func Run(out io.Writer, args []string) error {
 	return nil
 }
 
-func extractEvents(post *gofeed.Item) ([]event, error) {
-	baseDate, err := extractBaseDate(post.Title)
+func getEvents(post *gofeed.Item) ([]event, error) {
+	baseDate, err := getBaseDate(post.Title)
 	if err != nil {
 		return nil, err
 	}
@@ -68,7 +68,7 @@ func buildCalendar(events []event) string {
 
 var titlePattern = regexp.MustCompile(`^\d{4}年\d{1,2}月のGoイベント一覧$`)
 
-func extractEventPosts(source io.Reader) ([]*gofeed.Item, error) {
+func getEventPosts(source io.Reader) ([]*gofeed.Item, error) {
 	feed, err := gofeed.NewParser().Parse(source)
 	if err != nil {
 		return nil, err
@@ -173,7 +173,7 @@ func parsePartialTime(layout, value string, base time.Time) (time.Time, error) {
 	return time.Date(base.Year(), base.Month(), base.Day(), t.Hour(), t.Minute(), 0, 0, base.Location()), nil
 }
 
-func extractBaseDate(postTitle string) (time.Time, error) {
+func getBaseDate(postTitle string) (time.Time, error) {
 	loc, err := time.LoadLocation("Asia/Tokyo")
 	if err != nil {
 		return time.Time{}, err
