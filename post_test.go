@@ -1,11 +1,7 @@
 package calendar
 
 import (
-	"bytes"
-	"fmt"
 	"io"
-	"net/http"
-	"net/http/httptest"
 	"os"
 	"path/filepath"
 	"testing"
@@ -15,21 +11,6 @@ import (
 	"gotest.tools/v3/assert"
 	is "gotest.tools/v3/assert/cmp"
 )
-
-func TestRun(t *testing.T) {
-	ts := httptest.NewServer(
-		http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			fmt.Fprintln(w, loadTestdata(t, "blog_full.xml"))
-		}),
-	)
-	defer ts.Close()
-
-	var out bytes.Buffer
-	err := Run(&out, []string{ts.URL})
-	// os.WriteFile("testdata/blog_full.ical", out.Bytes(), 0644)
-	assert.NilError(t, err)
-	assert.Equal(t, out.String(), loadTestdata(t, "blog_full.ical"))
-}
 
 func TestExtractBaseDate(t *testing.T) {
 	t.Run("normal", func(t *testing.T) {
@@ -48,10 +29,10 @@ func TestExtractBaseDate(t *testing.T) {
 
 func TestExtractEvents(t *testing.T) {
 	source := loadTestdata(t, "content.html")
-	got, err := _extractEvents(source, newTime(t, 2022, time.August, 1, 0, 0))
+	got, err := extractEvents(source, newTime(t, 2022, time.August, 1, 0, 0))
 	assert.NilError(t, err)
 
-	want := []event{
+	want := []Event{
 		{
 			start:    newTime(t, 2022, time.August, 1, 17, 0),
 			end:      newTime(t, 2022, time.August, 1, 20, 0),
@@ -67,7 +48,7 @@ func TestExtractEvents(t *testing.T) {
 			url:      "https://gocon.connpass.com/event/2345/",
 		},
 	}
-	assert.Check(t, is.DeepEqual(got, want, cmp.AllowUnexported(event{})))
+	assert.Check(t, is.DeepEqual(got, want, cmp.AllowUnexported(Event{})))
 }
 
 func TestParsePartialTime(t *testing.T) {

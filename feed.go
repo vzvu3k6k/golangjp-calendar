@@ -21,11 +21,11 @@ func NewFeed(source io.Reader) (*Feed, error) {
 
 var titlePattern = regexp.MustCompile(`^\d{4}年\d{1,2}月のGoイベント一覧$`)
 
-func (f *Feed) GetEventPosts() []*gofeed.Item {
-	var items []*gofeed.Item
+func (f *Feed) GetEventPosts() []*Post {
+	var items []*Post
 	for _, item := range f.Items {
 		if titlePattern.MatchString(item.Title) {
-			items = append(items, item)
+			items = append(items, &Post{item})
 		}
 	}
 	return items

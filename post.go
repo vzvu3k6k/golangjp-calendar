@@ -1,73 +1,26 @@
 package calendar
 
 import (
-	"fmt"
-	"io"
-	"net/http"
 	"regexp"
 	"strings"
 	"time"
 
 	"github.com/antchfx/htmlquery"
-	ics "github.com/arran4/golang-ical"
 	"github.com/mmcdole/gofeed"
 	"golang.org/x/net/html"
 )
 
-func Run(out io.Writer, args []string) error {
-	feedURL := args[0]
-
-	resp, err := http.Get(feedURL)
-	if err != nil {
-		return err
-	}
-	defer resp.Body.Close()
-
-	feed, err := NewFeed(resp.Body)
-	if err != nil {
-		return err
-	}
-
-	var events []event
-	for _, post := range feed.GetEventPosts()[:1] {
-		e, err := getEvents(post)
-		if err != nil {
-			return err
-		}
-		events = append(events, e...)
-	}
-
-	calendar := buildCalendar(events)
-	fmt.Fprintln(out, calendar)
-
-	return nil
+type Post struct {
+	*gofeed.Item
 }
 
-func getEvents(post *gofeed.Item) ([]event, error) {
-	baseDate, err := getBaseDate(post.Title)
+func (p Post) GetEvents() ([]Event, error) {
+	baseDate, err := getBaseDate(p.Title)
 	if err != nil {
 		return nil, err
 	}
 
-	return _extractEvents(post.Content, baseDate)
-}
-
-func buildCalendar(events []event) string {
-	cal := ics.NewCalendar()
-	cal.SetMethod(ics.MethodRequest)
-	for _, event := range events {
-		e := cal.AddEvent(fmt.Sprintf("id@domain-%d", event.start.Unix())) // TODO: まともなIDを生成する
-		e.SetStartAt(event.start)
-		e.SetEndAt(event.end)
-		e.SetSummary(event.title)
-		e.SetLocation(event.location)
-		e.SetURL(event.url)
-	}
-	return cal.Serialize()
-}
-
-func _extractEvents(content string, baseDate time.Time) ([]event, error) {
-	doc, err := htmlquery.Parse(strings.NewReader(content))
+	doc, err := htmlquery.Parse(strings.NewReader(p.Content))
 	if err != nil {
 		return nil, err
 	}
@@ -77,7 +30,7 @@ func _extractEvents(content string, baseDate time.Time) ([]event, error) {
 		return nil, err
 	}
 
-	var events []event
+	var events []Event
 	for _, node := range nodes {
 		e, err := parseEvent(node, baseDate)
 		if err != nil {
@@ -91,13 +44,13 @@ func _extractEvents(content string, baseDate time.Time) ([]event, error) {
 
 var eventTextRegexp = regexp.MustCompile(`(\d{1,2}/\d{1,2})\([日月火水木金土]\)\p{Zs}*(\d{1,2}:\d{2})〜(\d{1,2}:\d{2})\p{Zs}*\[(.+?)\]`)
 
-func parseEvent(node *html.Node, baseDate time.Time) (event, error) {
-	var e event
+func parseEvent(node *html.Node, baseDate time.Time) (Event, error) {
+	var e Event
 
 	link := htmlquery.FindOne(node, "./a")
 	title, url, err := parseTitleAndURL(link)
 	if err != nil {
-		return event{}, err
+		return Event{}, err
 	}
 	e.title = title
 	e.url = url
@@ -108,7 +61,7 @@ func parseEvent(node *html.Node, baseDate time.Time) (event, error) {
 
 	start, end, err := parseStartAndEnd(text, baseDate)
 	if err != nil {
-		return event{}, err
+		return Event{}, err
 	}
 	e.start = start
 	e.end = end
