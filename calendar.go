@@ -17,19 +17,19 @@ import (
 func Run(out io.Writer, args []string) error {
 	feedURL := args[0]
 
-	feed, err := http.Get(feedURL)
+	resp, err := http.Get(feedURL)
 	if err != nil {
 		return err
 	}
-	defer feed.Body.Close()
+	defer resp.Body.Close()
 
-	posts, err := getEventPosts(feed.Body)
+	feed, err := NewFeed(resp.Body)
 	if err != nil {
 		return err
 	}
 
 	var events []event
-	for _, post := range posts[:1] {
+	for _, post := range feed.GetEventPosts()[:1] {
 		e, err := getEvents(post)
 		if err != nil {
 			return err
@@ -64,23 +64,6 @@ func buildCalendar(events []event) string {
 		e.SetURL(event.url)
 	}
 	return cal.Serialize()
-}
-
-var titlePattern = regexp.MustCompile(`^\d{4}年\d{1,2}月のGoイベント一覧$`)
-
-func getEventPosts(source io.Reader) ([]*gofeed.Item, error) {
-	feed, err := gofeed.NewParser().Parse(source)
-	if err != nil {
-		return nil, err
-	}
-
-	var items []*gofeed.Item
-	for _, item := range feed.Items {
-		if titlePattern.MatchString(item.Title) {
-			items = append(items, item)
-		}
-	}
-	return items, nil
 }
 
 func _extractEvents(content string, baseDate time.Time) ([]event, error) {

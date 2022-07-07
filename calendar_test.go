@@ -8,7 +8,6 @@ import (
 	"net/http/httptest"
 	"os"
 	"path/filepath"
-	"strings"
 	"testing"
 	"time"
 
@@ -30,14 +29,6 @@ func TestRun(t *testing.T) {
 	// os.WriteFile("testdata/blog_full.ical", out.Bytes(), 0644)
 	assert.NilError(t, err)
 	assert.Equal(t, out.String(), loadTestdata(t, "blog_full.ical"))
-}
-
-func TestGetEventItems(t *testing.T) {
-	source := loadTestdata(t, "blog.xml")
-	items, err := getEventPosts(strings.NewReader(source))
-	assert.NilError(t, err)
-	assert.Assert(t, is.Len(items, 1))
-	assert.Equal(t, items[0].Title, "2022年7月のGoイベント一覧")
 }
 
 func TestExtractBaseDate(t *testing.T) {
