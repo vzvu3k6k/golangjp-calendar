@@ -25,7 +25,7 @@ func (f *Feed) GetEventPosts() []*Post {
 	var items []*Post
 	for _, item := range f.Items {
 		if titlePattern.MatchString(item.Title) {
-			items = append(items, &Post{item})
+			items = append(items, &Post{Title: item.Title, Content: item.Content})
 		}
 	}
 	return items

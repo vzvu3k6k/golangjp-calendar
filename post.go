@@ -6,12 +6,12 @@ import (
 	"time"
 
 	"github.com/antchfx/htmlquery"
-	"github.com/mmcdole/gofeed"
 	"golang.org/x/net/html"
 )
 
 type Post struct {
-	*gofeed.Item
+	Title   string
+	Content string
 }
 
 func (p Post) GetEvents() ([]Event, error) {

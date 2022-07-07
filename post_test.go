@@ -1,9 +1,6 @@
 package calendar
 
 import (
-	"io"
-	"os"
-	"path/filepath"
 	"testing"
 	"time"
 
@@ -28,8 +25,11 @@ func TestExtractBaseDate(t *testing.T) {
 }
 
 func TestExtractEvents(t *testing.T) {
-	source := loadTestdata(t, "content.html")
-	got, err := extractEvents(source, newTime(t, 2022, time.August, 1, 0, 0))
+	post := &Post{
+		Title:   "2022年8月のGoイベント一覧",
+		Content: loadTestdata(t, "content.html"),
+	}
+	got, err := post.GetEvents()
 	assert.NilError(t, err)
 
 	want := []Event{
@@ -63,21 +63,6 @@ func TestParsePartialTime(t *testing.T) {
 		_, err := parsePartialTime("15:04", "invalid", base)
 		assert.ErrorContains(t, err, "cannot parse")
 	})
-}
-
-func loadTestdata(t *testing.T, filename string) string {
-	t.Helper()
-	f, err := os.Open(filepath.Join("testdata", filename))
-	if err != nil {
-		t.Error(err)
-	}
-	t.Cleanup(func() { f.Close() })
-
-	content, err := io.ReadAll(f)
-	if err != nil {
-		t.Error(err)
-	}
-	return string(content)
 }
 
 func newTime(t *testing.T, year int, month time.Month, day, hour, min int) time.Time {
