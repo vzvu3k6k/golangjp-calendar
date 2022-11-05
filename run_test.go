@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	"gotest.tools/v3/assert"
+	"gotest.tools/v3/golden"
 )
 
 func TestRun(t *testing.T) {
@@ -20,7 +21,6 @@ func TestRun(t *testing.T) {
 
 	var out bytes.Buffer
 	err := Run(&out, []string{ts.URL})
-	// os.WriteFile("testdata/blog_full.ical", out.Bytes(), 0644)
 	assert.NilError(t, err)
-	assert.Equal(t, out.String(), loadTestdata(t, "blog_full.ical"))
+	golden.Assert(t, out.String(), "blog_full.ical")
 }
